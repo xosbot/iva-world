@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVA-World: Multi-Agent Virtual Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        #gameCanvas {
+            border: 3px solid #4a4a6a;
+            border-radius: 10px;
+            background: #f5f5dc;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .status-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+
+        .status-header {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .agent-status {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .agent-status:last-child {
+            border-bottom: none;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .agent-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .agent-state {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .state-idle { background: #d4edda; color: #155724; }
+        .state-thinking { background: #fff3cd; color: #856404; }
+        .state-communicating { background: #cce5ff; color: #004085; }
+        .state-using-tool { background: #f8d7da; color: #721c24; }
+
+        .connection-status {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        .connecting { background: #fff3cd; color: #856404; }
+
+        .legend {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐱 IVA-World 🐱</h1>
+        <p class="subtitle">Multi-Agent Orchestrator with 2D Virtual Visualization</p>
+        
+        <canvas id="gameCanvas" width="800" height="800"></canvas>
+        
+        <div class="status-panel">
+            <div class="status-header">Agent Status</div>
+            <div id="agentStatusList">
+                <!-- Agent statuses will be populated here -->
+            </div>
+        </div>
+        
+        <div id="connectionStatus" class="connection-status connecting">
+            Connecting to server...
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FFB6C1;"></div>
+                <span>IVA (Orchestrator)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #E8D5C4;"></div>
+                <span>Luna (Research)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #D2B48C;"></div>
+                <span>Archie (Engineering)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2C2C2C;"></div>
+                <span>Byte (Code Writer)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FFA07A;"></div>
+                <span>Pixel (Designer)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #DDA0DD;"></div>
+                <span>Guardian (QA)</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

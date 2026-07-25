@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVA-World 3D Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        #status-panel {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 300px;
+        }
+        
+        #status-panel h2 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        .agent-status {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            padding: 5px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        
+        .agent-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        #connection-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            z-index: 100;
+        }
+        
+        .connected { background: #4ade80; color: #000; }
+        .disconnected { background: #f87171; }
+        
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+        }
+        
+        #speech-bubble {
+            position: absolute;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            max-width: 200px;
+            font-size: 12px;
+            display: none;
+            z-index: 50;
+            pointer-events: none;
+        }
+        
+        #speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
+        }
+        
+        #legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="ui-overlay">
+        <div id="status-panel">
+            <h2>🐱 Agent Status</h2>
+            <div id="agent-list"></div>
+        </div>
+    </div>
+    
+    <div id="connection-status" class="disconnected">Disconnected</div>
+    
+    <div id="controls">
+        <button class="control-btn" onclick="toggleAutoRotate()">🔄 Auto Rotate</button>
+        <button class="control-btn" onclick="resetCamera()">📷 Reset Camera</button>
+        <button class="control-btn" onclick="toggleWireframe()">🕸️ Wireframe</button>
+    </div>
+    
+    <div id="speech-bubble"></div>
+    
+    <div id="legend">
+        <h3 style="margin-bottom: 10px;">Agent Legend</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffffff;"></div>
+            <span>IVA (Orchestrator)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f0e6d2;"></div>
+            <span>Luna (Research)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #d4a574;"></div>
+            <span>Archie (Engineering)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #2c2c2c;"></div>
+            <span>Byte (Code)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9500;"></div>
+            <span>Pixel (Design)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffb6c1;"></div>
+            <span>Guardian (QA)</span>
+        </div>
+    </div>
+
+    <!-- Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="app3d.js"></script>
+</body>
+</html>

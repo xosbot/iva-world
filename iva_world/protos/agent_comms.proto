@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package agent_comms;
+
+// Agent identifiers
+enum AgentType {
+    AGENT_TYPE_UNSPECIFIED = 0;
+    AGENT_TYPE_IVA = 1;           // Orchestrator - White Persian
+    AGENT_TYPE_LUNA = 2;          // Market Research - Siamese
+    AGENT_TYPE_ARCHIE = 3;        // Software Engineering - Tabby
+    AGENT_TYPE_BYTE = 4;          // Code Writer - Black Cat
+    AGENT_TYPE_PIXEL = 5;         // UI/UX Designer - Calico
+    AGENT_TYPE_GUARDIAN = 6;      // Security & QA - Sphynx
+}
+
+// Agent status for visualization
+enum AgentStatus {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_IDLE = 1;
+    STATUS_THINKING = 2;
+    STATUS_COMMUNICATING = 3;
+    STATUS_USING_TOOL = 4;
+}
+
+// Task request message (IVA -> Sub-Agents, or Sub-Agent -> Mini-Agent)
+message TaskRequest {
+    string task_id = 1;
+    AgentType sender = 2;
+    AgentType recipient = 3;
+    string task_description = 4;
+    map<string, string> context = 5;
+    int32 priority = 6;
+}
+
+// Task response message
+message TaskResponse {
+    string task_id = 1;
+    AgentType sender = 2;
+    AgentType recipient = 3;
+    bool success = 4;
+    string result = 5;
+    repeated string output_files = 6;
+    string error_message = 7;
+}
+
+// Agent state for real-time visualization streaming
+message AgentState {
+    string agent_id = 1;
+    AgentType agent_type = 2;
+    AgentStatus status = 3;
+    int32 grid_x = 4;
+    int32 grid_y = 5;
+    string current_activity = 6;
+    string speech_bubble = 7;
+    int64 timestamp = 8;
+}
+
+// Stream of agent states for WebSocket broadcasting
+message AgentStateStream {
+    repeated AgentState states = 1;
+    int64 world_timestamp = 2;
+}
+
+// gRPC Service definition
+service AgentCommunicationService {
+    // Send a task to another agent
+    rpc SendTask(TaskRequest) returns (TaskResponse);
+    
+    // Stream agent states for visualization (server-side streaming)
+    rpc StreamAgentStates(AgentState) returns (stream AgentStateStream);
+    
+    // Bidirectional streaming for inter-agent communication
+    rpc AgentChat(stream TaskRequest) returns (stream TaskResponse);
+}
